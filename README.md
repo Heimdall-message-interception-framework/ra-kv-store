@@ -7,10 +7,10 @@ to be used in certain integration tests. It is not meant to be a general purpose
 
 # Usage
 
-Start the HTTP API:
+Start the HTTP API (added ```sudo``` since some files could not be copied otherwise but TODO: change this):
 
 ```
-$ make run
+$ sudo make run
 ```
 
 Use [HTTPie](https://httpie.org/) to play with the KV store. Retrieving a value:
