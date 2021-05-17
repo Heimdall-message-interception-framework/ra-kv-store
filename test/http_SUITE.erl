@@ -70,7 +70,9 @@ http_handler(_Config) ->
         #{env => #{dispatch => Dispatch}}
     ),
 
-    ok = inets:start(),
+%%    ok = inets:start(),
+%%  the one above does not work with `rebar3` ct but only `make ct`
+    application:ensure_started(inets),
 
     Url = io_lib:format("http://localhost:~p/~p", [Port, 1]),
 
