@@ -44,7 +44,13 @@ start(_Type, _Args) ->
     ClusterId = <<"ra_kv_store">>,
     Config = #{},
     Machine = {module, ra_kv_store, Config},
-    ok = ra:start(),
+    % MIL: start scheduler and message interception_layer and pass it to ra
+    {ok, Scheduler} = scheduler_naive:start(),
+    {ok, MIL} = message_interception_layer:start(Scheduler),
+    erlang:display("show MIL" + MIL),
+    ok = ra:start([{msg_int_layer, MIL}]),
+    % will be set by application env in ra.erl
+    % LIM
 
     case application:get_env(ra_kv_store, restart_ra_cluster) of
         {ok, true} ->

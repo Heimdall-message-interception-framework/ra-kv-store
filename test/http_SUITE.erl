@@ -51,7 +51,14 @@ http_handler(_Config) ->
     Config = #{},
     Machine = {module, ra_kv_store, Config},
     application:ensure_all_started(ra),
-    ra_system:start_default(),
+    % MIL: start scheduler and message interception_layer and pass it to ra
+    {ok, Scheduler} = scheduler_naive:start(),
+    {ok, MIL} = message_interception_layer:start(Scheduler),
+%%    erlang:display(MIL),
+    {ok, [ra]} = ra:start([{msg_int_layer, MIL}]),
+%%    ra_system:start_default(),
+    % will be set by application env in ra.erl
+    % LIM
     {ok, _, _} = ra:start_cluster(default, ClusterId, Machine, Nodes),
     {ok, _, {Leader, _}} = ra:members(hd(Nodes)),
 

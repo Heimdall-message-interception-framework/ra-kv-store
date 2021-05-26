@@ -46,6 +46,7 @@ end_per_suite(Config) ->
 %% -------------------------------------------------------------------
 
 replay(_Config) ->
+    erlang:display("reached here"),
     Nodes = [{ra_kv1, node()}, {ra_kv2, node()}, {ra_kv3, node()}],
     ClusterId = <<"ra_kv_store">>,
     Config = #{},
