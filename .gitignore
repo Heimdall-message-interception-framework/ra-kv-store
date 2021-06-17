@@ -34,3 +34,5 @@ _rel/
 
 .vagrant
 *.tar.gz
+
+_checkouts/*
