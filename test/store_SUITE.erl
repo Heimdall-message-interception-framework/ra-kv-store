@@ -32,6 +32,9 @@ group() -> [].
 
 init_per_suite(Config) ->
     application:load(ra),
+%%  MIL
+    logger:set_primary_config(level, info),
+%%  LIM
     WorkDirectory = proplists:get_value(priv_dir, Config),
     ok = application:set_env(ra, data_dir, filename:join(WorkDirectory, "ra")),
     ok = application:set_env(ra_kv_store, release_cursor_every, 1),
@@ -40,6 +43,15 @@ init_per_suite(Config) ->
 end_per_suite(Config) ->
     application:stop(ra),
     Config.
+
+%% MIL
+init_per_testcase(TestCase, Config) ->
+    {_, ConfigReadable} = logging_configs:get_config_for_readable(TestCase),
+    logger:add_handler(readable_handler, logger_std_h, ConfigReadable),
+    {_, ConfigMachine} = logging_configs:get_config_for_machine(TestCase),
+    logger:add_handler(machine_handler, logger_std_h, ConfigMachine),
+    Config.
+%% LIM
 
 %% -------------------------------------------------------------------
 %% Testcases.
@@ -51,7 +63,16 @@ kv_store(_Config) ->
     Config = #{},
     Machine = {module, ra_kv_store, Config},
     application:ensure_all_started(ra),
-    ra_system:start_default(),
+
+    % MIL: start scheduler and message interception_layer and pass it to ra
+    {ok, Scheduler} = scheduler_naive:start(),
+    {ok, MIL} = message_interception_layer:start(Scheduler),
+%%    erlang:display(MIL),
+    {ok, [ra]} = ra:start([{msg_int_layer, MIL}]),
+%%    ra_system:start_default(),
+    % will be set by application env in ra.erl
+    % LIM
+
     {ok, _, _} = ra:start_cluster(default, ClusterId, Machine, Nodes),
     {ok, _} = ra_kv_store:write(ra_kv1, 1, 2),
     2 = ra_kv_store:read(ra_kv1, 1),

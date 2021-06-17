@@ -32,7 +32,10 @@ group() -> [].
 
 init_per_suite(Config) ->
     application:load(ra),
-    logger:set_primary_config(level, all),
+%%  MIL
+%%    logger:set_primary_config(level, all),
+    logger:set_primary_config(level, info),
+%%  LIM
     WorkDirectory = proplists:get_value(priv_dir, Config),
     ok = application:set_env(ra, data_dir, filename:join(WorkDirectory, "ra")),
     Config.
@@ -40,6 +43,15 @@ init_per_suite(Config) ->
 end_per_suite(Config) ->
     application:stop(ra),
     Config.
+
+%% MIL
+init_per_testcase(TestCase, Config) ->
+    {_, ConfigReadable} = logging_configs:get_config_for_readable(TestCase),
+    logger:add_handler(readable_handler, logger_std_h, ConfigReadable),
+    {_, ConfigMachine} = logging_configs:get_config_for_machine(TestCase),
+    logger:add_handler(machine_handler, logger_std_h, ConfigMachine),
+    Config.
+%% LIM
 
 %% -------------------------------------------------------------------
 %% Testcases.
