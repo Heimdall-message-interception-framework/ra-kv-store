@@ -23,6 +23,7 @@
          cas/4]).
 
 write(ServerReference, Key, Value) ->
+    erlang:display(["ra_kv_store:write:26", "self", self(), "ServerReference", ServerReference, "Key", Key, "Value", Value]),
     Cmd = {write, Key, Value},
     case ra:process_command(ServerReference, Cmd) of
         {ok, {Index, Term}, LeaderRaNodeId} ->
@@ -31,6 +32,7 @@ write(ServerReference, Key, Value) ->
     end.
 
 read(ServerReference, Key) ->
+    erlang:display(["ra_kv_store:read:35", "self", self(), "ServerReference", ServerReference, "Key", Key]),
     case ra:consistent_query(ServerReference,
                                          fun(State) ->
                                                  maps:get(Key, State, undefined)
@@ -44,6 +46,7 @@ read(ServerReference, Key) ->
     end.
 
 cas(ServerReference, Key, ExpectedValue, NewValue) ->
+    erlang:display(["ra_kv_store:cas:49", "self", self(), "ServerReference", ServerReference, "Key", Key, "Exp", ExpectedValue, "New", NewValue]),
     Cmd = {cas, Key, ExpectedValue, NewValue},
     case ra:process_command(ServerReference, Cmd) of
         {ok, {{read, ReadValue}, {index, Index}, {term, Term}}, LeaderRaNodeId} ->
