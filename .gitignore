@@ -36,3 +36,4 @@ _rel/
 *.tar.gz
 
 _checkouts/*
+deps/*

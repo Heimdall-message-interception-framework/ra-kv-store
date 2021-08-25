@@ -67,6 +67,9 @@ kv_store(_Config) ->
     % MIL: start scheduler and message interception_layer and pass it to ra
     {ok, Scheduler} = scheduler_naive:start(),
     {ok, MIL} = message_interception_layer:start(Scheduler),
+    scheduler_naive:register_msg_int_layer(Scheduler, MIL),
+    message_interception_layer:start_msg_int_layer(MIL),
+    scheduler_naive:start(),
 %%    erlang:display(MIL),
     {ok, [ra]} = ra:start([{msg_int_layer, MIL}]),
 %%    ra_system:start_default(),
