@@ -64,17 +64,16 @@ kv_store(_Config) ->
     Machine = {module, ra_kv_store, Config},
     application:ensure_all_started(ra),
 
-    % MIL: start scheduler and message interception_layer and pass it to ra
+    % MIL: start scheduler and message interception_layer
     {ok, Scheduler} = scheduler_naive:start(),
     {ok, MIL} = message_interception_layer:start(Scheduler),
+    application:set_env(sched_msg_interception_erlang, msg_int_layer, MIL),
     scheduler_naive:register_msg_int_layer(Scheduler, MIL),
     message_interception_layer:start_msg_int_layer(MIL),
     scheduler_naive:start(),
 %%    erlang:display(MIL),
-    {ok, [ra]} = ra:start([{msg_int_layer, MIL}]),
+    ok = ra:start(), % did not work w/o MIL in parameters
 %%    ra_system:start_default(),
-    % will be set by application env in ra.erl
-    % LIM
 
     {ok, _, _} = ra:start_cluster(default, ClusterId, Machine, Nodes),
     {ok, _} = ra_kv_store:write(ra_kv1, 1, 2),

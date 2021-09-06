@@ -57,7 +57,8 @@ cas(ServerReference, Key, ExpectedValue, NewValue) ->
         {timeout, _} -> timeout
     end.
 
-init(_Config) -> #{}.
+init(_Config) ->
+  #{}.
 
 apply(#{index := Index,
         term := Term} = _Metadata, {write, Key, Value}, State) ->
