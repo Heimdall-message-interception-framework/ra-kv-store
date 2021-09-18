@@ -65,6 +65,11 @@ apply(#{index := Index,
     NewState = maps:put(Key, Value, State),
     SideEffects = side_effects(Index, NewState),
     %% return the index and term here as a result
+%%  OBS
+	  gen_event:sync_notify({global,om}, {ra_machine, {{pid, self()}, {state_update, State, NewState}}}),
+    gen_event:sync_notify({global,om}, {ra_machine, {{pid, self()}, {reply, {{index, Index}, {term, Term}}}}}),
+    gen_event:sync_notify({global,om}, {ra_machine, {{pid, self()}, {side_effects, SideEffects}}}),
+%%  SBO
     {NewState, {Index, Term}, SideEffects};
 apply(#{index := Index, term := Term} = _Metadata,
       {cas, Key, ExpectedValue, NewValue}, State) ->
@@ -75,7 +80,12 @@ apply(#{index := Index, term := Term} = _Metadata,
                                     {State, ValueInStore}
                             end,
     SideEffects = side_effects(Index, NewState),
-    {NewState, {{read, ReadValue}, {index, Index}, {term, Term}}, SideEffects}.
+%%  OBS
+    gen_event:sync_notify({global,om}, {ra_machine, {self(), state_update, State, NewState}}),
+    gen_event:sync_notify({global,om}, {ra_machine, {self(), reply, {{read, ReadValue}, {index, Index}, {term, Term}}}}),
+    gen_event:sync_notify({global,om}, {ra_machine, {self(), side_effects, SideEffects}}),
+%%  SBO
+  {NewState, {{read, ReadValue}, {index, Index}, {term, Term}}, SideEffects}.
 
 side_effects(RaftIndex, MachineState) ->
     case application:get_env(ra_kv_store, release_cursor_every) of

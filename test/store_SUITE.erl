@@ -50,6 +50,8 @@ init_per_testcase(TestCase, Config) ->
     logger:add_handler(readable_handler, logger_std_h, ConfigReadable),
     {_, ConfigMachine} = logging_configs:get_config_for_machine(TestCase),
     logger:add_handler(machine_handler, logger_std_h, ConfigMachine),
+    {ok, _} = gen_event:start({global, om}),
+    ok = gen_event:add_handler({global, om}, universal_observer, []),
     Config.
 %% LIM
 
