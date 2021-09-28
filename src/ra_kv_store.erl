@@ -16,6 +16,10 @@
 -module(ra_kv_store).
 -behaviour(ra_machine).
 
+%% OBS
+-include("ra_kv_store_observer_events.hrl").
+%% SBO
+
 -export([init/1,
          apply/3,
          write/3,
@@ -64,12 +68,18 @@ apply(#{index := Index,
         term := Term} = _Metadata, {write, Key, Value}, State) ->
     NewState = maps:put(Key, Value, State),
     SideEffects = side_effects(Index, NewState),
-    %% return the index and term here as a result
 %%  OBS
-	  gen_event:sync_notify({global,om}, {ra_machine, {{pid, self()}, {state_update, State, NewState}}}),
-    gen_event:sync_notify({global,om}, {ra_machine, {{pid, self()}, {reply, {{index, Index}, {term, Term}}}}}),
-    gen_event:sync_notify({global,om}, {ra_machine, {{pid, self()}, {side_effects, SideEffects}}}),
+    RaMachineStateUpdateEvent = #ra_machine_state_update_obs_event{old_state=State, new_state=NewState},
+    gen_event:sync_notify({global, om},
+      {process, #obs_process_event{process=self(), event_type=ra_machine_state_update, event_content=RaMachineStateUpdateEvent}}),
+    RaMachineReplyWriteEvent = #ra_machine_reply_read_obs_event{index=Index, term=Term},
+    gen_event:sync_notify({global, om},
+      {process, #obs_process_event{process=self(), event_type=ra_machine_reply_read, event_content=RaMachineReplyWriteEvent}}),
+    RaMachineSideEffects = #ra_machine_side_effects_obs_event{side_effects=SideEffects},
+    gen_event:sync_notify({global, om},
+      {process, #obs_process_event{process=self(), event_type=ra_machine_side_effects, event_content=RaMachineSideEffects}}),
 %%  SBO
+    %% return the index and term here as a result
     {NewState, {Index, Term}, SideEffects};
 apply(#{index := Index, term := Term} = _Metadata,
       {cas, Key, ExpectedValue, NewValue}, State) ->
@@ -81,11 +91,17 @@ apply(#{index := Index, term := Term} = _Metadata,
                             end,
     SideEffects = side_effects(Index, NewState),
 %%  OBS
-    gen_event:sync_notify({global,om}, {ra_machine, {self(), state_update, State, NewState}}),
-    gen_event:sync_notify({global,om}, {ra_machine, {self(), reply, {{read, ReadValue}, {index, Index}, {term, Term}}}}),
-    gen_event:sync_notify({global,om}, {ra_machine, {self(), side_effects, SideEffects}}),
+    RaMachineStateUpdateEvent = #ra_machine_state_update_obs_event{old_state=State, new_state=NewState},
+    gen_event:sync_notify({global, om},
+      {process, #obs_process_event{process=self(), event_type=ra_machine_state_update, event_content=RaMachineStateUpdateEvent}}),
+    RaMachineReplyReadEvent = #ra_machine_reply_read_obs_event{read=ReadValue, index=Index, term=Term},
+    gen_event:sync_notify({global, om},
+      {process, #obs_process_event{process=self(), event_type=ra_machine_reply_read, event_content= RaMachineReplyReadEvent}}),
+    RaMachineSideEffects = #ra_machine_side_effects_obs_event{side_effects=SideEffects},
+    gen_event:sync_notify({global, om},
+      {process, #obs_process_event{process=self(), event_type=ra_machine_side_effects, event_content= RaMachineSideEffects}}),
 %%  SBO
-  {NewState, {{read, ReadValue}, {index, Index}, {term, Term}}, SideEffects}.
+    {NewState, {{read, ReadValue}, {index, Index}, {term, Term}}, SideEffects}.
 
 side_effects(RaftIndex, MachineState) ->
     case application:get_env(ra_kv_store, release_cursor_every) of
