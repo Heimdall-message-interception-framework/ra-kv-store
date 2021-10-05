@@ -44,16 +44,25 @@ end_per_suite(Config) ->
     application:stop(ra),
     Config.
 
-%% MIL
 init_per_testcase(TestCase, Config) ->
+%% MIL
     {_, ConfigReadable} = logging_configs:get_config_for_readable(TestCase),
     logger:add_handler(readable_handler, logger_std_h, ConfigReadable),
     {_, ConfigMachine} = logging_configs:get_config_for_machine(TestCase),
     logger:add_handler(machine_handler, logger_std_h, ConfigMachine),
-    {ok, _} = gen_event:start({global, om}),
-    ok = gen_event:add_handler({global, om}, universal_observer, []),
-    Config.
 %% LIM
+%% OBS
+    {ok, _} = gen_event:start({global, om}),
+    ok = gen_event:add_handler({global, om}, raft_observer_election_safety, []),
+    ok = gen_event:add_handler({global, om}, raft_observer_leader_append_only, []),
+    ok = gen_event:add_handler({global, om}, raft_observer_leader_completeness, []),
+    ok = gen_event:add_handler({global, om}, raft_observer_state_machine_safety, []),
+    ok = gen_event:add_handler({global, om}, raft_observer_log_matching, []),
+%% SBO
+    Config.
+
+end_per_testcase(_TestCase, _Config) ->
+    ok.
 
 %% -------------------------------------------------------------------
 %% Testcases.
