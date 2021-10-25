@@ -3,11 +3,12 @@
 -include_lib("common_test/include/ct.hrl").
 -include_lib("stdlib/include/assert.hrl").
 
--export([all/0, test_engine/1, test_module/1, init_per_testcase/2, init_per_suite/1, end_per_suite/1, end_per_testcase/2]).
+-export([all/0, test_engine/1, test_module/1, init_per_testcase/2, init_per_suite/1, end_per_suite/1, end_per_testcase/2, test_bfs_scheduler/1]).
 
 all() -> [
    test_module,
-   test_engine
+   test_engine,
+   test_bfs_scheduler
 ].
 
 init_per_suite(Config) ->
@@ -76,7 +77,21 @@ test_engine(InitialConfig) ->
   Conf = maps:from_list([{num_processes, 2}] ++ InitialConfig),
   Timeout = 20000,
   Runs = test_engine:explore(Engine, 'ra-kv-store_module', Conf,
-                             MILInstructions, 2, 20, Timeout), % 100, 5
+                             MILInstructions, 1, 40, Timeout), % 100, 5
+  lists:foreach(fun({RunId, History}) -> io:format("Run ~p: ~p", [RunId,History]) end, Runs).
+
+
+test_bfs_scheduler(InitialConfig) ->
+  {ok, Engine} = gen_server:start_link(test_engine, ['ra-kv-store_module', scheduler_bfs], []),
+  MILInstructions = [],
+  Conf = maps:from_list([
+    {num_processes, 2},
+    {num_possible_dev_points, 10},
+    {size_d_tuple, 5}
+    ] ++ InitialConfig),
+  Timeout = 20000,
+  Runs = test_engine:explore(Engine, 'ra-kv-store_module', Conf,
+    MILInstructions, 1, 40, Timeout), % 100, 5
   lists:foreach(fun({RunId, History}) -> io:format("Run ~p: ~p", [RunId,History]) end, Runs).
 
 
