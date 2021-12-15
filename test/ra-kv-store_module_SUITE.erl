@@ -76,7 +76,7 @@ test_engine(InitialConfig) ->
   {ok, Engine} = gen_server:start_link(test_engine, ['ra-kv-store_module', scheduler_random], []),
   MILInstructions = [],
   Conf = maps:from_list([{num_processes, 2}] ++ InitialConfig),
-  Timeout = 20000,
+  Timeout = infinity,
   Runs = test_engine:explore(Engine, 'ra-kv-store_module', Conf,
                              MILInstructions, 1, 40, Timeout), % 100, 5
   lists:foreach(fun({RunId, History}) -> io:format("Run ~p: ~p", [RunId,History]) end, Runs).
@@ -90,7 +90,7 @@ test_bfs_scheduler(InitialConfig) ->
     {num_possible_dev_points, 10},
     {size_d_tuple, 5}
     ] ++ InitialConfig),
-  Timeout = 20000,
+  Timeout = infinity,
   Runs = test_engine:explore(Engine, 'ra-kv-store_module', Conf,
     MILInstructions, 1, 40, Timeout), % 100, 5
   lists:foreach(fun({RunId, History}) -> io:format("Run ~p: ~p", [RunId,History]) end, Runs).
@@ -104,8 +104,8 @@ test_pct_scheduler(InitialConfig) ->
     {num_possible_dev_points, 40},
     {size_d_tuple, 5}
   ] ++ InitialConfig),
-  Timeout = 20000,
+  Timeout = infinity,
   Runs = test_engine:explore(Engine, 'ra-kv-store_module', Conf,
-    MILInstructions, 5, 40, Timeout), % 100, 5
+    MILInstructions, 1, 50, Timeout), % 100, 5
   lists:foreach(fun({RunId, History}) -> io:format("Run ~p: ~p", [RunId,History]) end, Runs).
 
