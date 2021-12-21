@@ -83,16 +83,19 @@ test_engine(InitialConfig) ->
 
 
 test_bfs_scheduler(InitialConfig) ->
+  {ok, HtmlMod} = gen_server:start(html_output, ["test_bfs_scheduler"],[]),
   {ok, Engine} = gen_server:start_link(test_engine, ['ra-kv-store_module', scheduler_bfs], []),
   MILInstructions = [],
   Conf = maps:from_list([
     {num_processes, 2},
     {num_possible_dev_points, 10},
-    {size_d_tuple, 5}
+    {size_d_tuple, 5},
+    {html_output, HtmlMod}
     ] ++ InitialConfig),
   Timeout = infinity,
   Runs = test_engine:explore(Engine, 'ra-kv-store_module', Conf,
     MILInstructions, 1, 40, Timeout), % 100, 5
+  gen_server:stop(HtmlMod),
   lists:foreach(fun({RunId, History}) -> io:format("Run ~p: ~p", [RunId,History]) end, Runs).
 
 
