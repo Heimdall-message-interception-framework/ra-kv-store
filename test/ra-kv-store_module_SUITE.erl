@@ -35,7 +35,7 @@ init_per_testcase(TestCase, Config) ->
 %%  ok = gen_event:add_handler({global, om}, raft_state_machine_safety, []),
 %%  ok = gen_event:add_handler({global, om}, raft_log_matching, []),
 %% SBO
-  Config.
+  Config ++ [{html_output, true}, {test_name, TestCase}].
 
 end_per_testcase(_, Config) ->
   Config.
@@ -83,19 +83,16 @@ test_engine(InitialConfig) ->
 
 
 test_bfs_scheduler(InitialConfig) ->
-  {ok, HtmlMod} = gen_server:start(html_output, ["test_bfs_scheduler"],[]),
   {ok, Engine} = gen_server:start_link(test_engine, ['ra-kv-store_module', scheduler_bfs], []),
   MILInstructions = [],
   Conf = maps:from_list([
     {num_processes, 2},
     {num_possible_dev_points, 10},
-    {size_d_tuple, 5},
-    {html_output, HtmlMod}
+    {size_d_tuple, 5}
     ] ++ InitialConfig),
   Timeout = infinity,
   Runs = test_engine:explore(Engine, 'ra-kv-store_module', Conf,
-    MILInstructions, 1, 40, Timeout), % 100, 5
-  gen_server:stop(HtmlMod),
+    MILInstructions, 3, 40, Timeout), % 100, 5
   lists:foreach(fun({RunId, History}) -> io:format("Run ~p: ~p", [RunId,History]) end, Runs).
 
 
@@ -109,6 +106,6 @@ test_pct_scheduler(InitialConfig) ->
   ] ++ InitialConfig),
   Timeout = infinity,
   Runs = test_engine:explore(Engine, 'ra-kv-store_module', Conf,
-    MILInstructions, 1, 50, Timeout), % 100, 5
+    MILInstructions, 3, 50, Timeout), % 100, 5
   lists:foreach(fun({RunId, History}) -> io:format("Run ~p: ~p", [RunId,History]) end, Runs).
 
