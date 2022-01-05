@@ -86,13 +86,13 @@ test_bfs_scheduler(InitialConfig) ->
   {ok, Engine} = gen_server:start_link(test_engine, ['ra-kv-store_module', scheduler_bfs], []),
   MILInstructions = [],
   Conf = maps:from_list([
-    {num_processes, 2},
+    {num_processes, list_to_integer(os:getenv("NUM_PROCESSES", "2"))},
     {num_possible_dev_points, 10},
     {size_d_tuple, 5}
     ] ++ InitialConfig),
   Timeout = infinity,
   Runs = test_engine:explore(Engine, 'ra-kv-store_module', Conf,
-    MILInstructions, 3, 40, Timeout), % 100, 5
+    MILInstructions, list_to_integer(os:getenv("NUM_RUNS", "2")), list_to_integer(os:getenv("RUN_LENGTH", "40")), Timeout), % 100, 5
   lists:foreach(fun({RunId, History}) -> io:format("Run ~p: ~p", [RunId,History]) end, Runs).
 
 
@@ -100,12 +100,12 @@ test_pct_scheduler(InitialConfig) ->
   {ok, Engine} = gen_server:start_link(test_engine, ['ra-kv-store_module', scheduler_pct], []),
   MILInstructions = [],
   Conf = maps:from_list([
-    {num_processes, 2},
+    {num_processes, list_to_integer(os:getenv("NUM_PROCESSES", "2"))},
     {num_possible_dev_points, 40},
     {size_d_tuple, 5}
   ] ++ InitialConfig),
   Timeout = infinity,
   Runs = test_engine:explore(Engine, 'ra-kv-store_module', Conf,
-    MILInstructions, 3, 50, Timeout), % 100, 5
+    MILInstructions, list_to_integer(os:getenv("NUM_RUNS", "3")), list_to_integer(os:getenv("RUN_LENGTH", "40")), Timeout), % 100, 5
   lists:foreach(fun({RunId, History}) -> io:format("Run ~p: ~p", [RunId,History]) end, Runs).
 
