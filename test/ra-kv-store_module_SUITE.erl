@@ -15,7 +15,9 @@ all() -> [
 init_per_suite(Config) ->
   application:load(ra),
 %%  MIL
-  logger:set_primary_config(level, info),
+  logger:set_primary_config(level, warning),
+  LogConf = #{config => #{file => "./MIL_log.log"}, level => warning},
+  logger:add_handler(myhandler, logger_std_h, LogConf),
 %%  LIM
   WorkDirectory = proplists:get_value(priv_dir, Config),
   ok = application:set_env(ra, data_dir, filename:join(WorkDirectory, "ra")),
