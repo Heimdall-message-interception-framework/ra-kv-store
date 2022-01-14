@@ -37,7 +37,7 @@ init_per_testcase(TestCase, Config) ->
 %%  ok = gen_event:add_handler({global, om}, raft_state_machine_safety, []),
 %%  ok = gen_event:add_handler({global, om}, raft_log_matching, []),
 %% SBO
-  Config ++ [{html_output, true}, {test_name, TestCase}].
+  Config ++ [{html_output, true}, {test_name, TestCase}, {persist, true}].
 
 end_per_testcase(_, Config) ->
   Config.
@@ -85,29 +85,35 @@ test_engine(InitialConfig) ->
 
 
 test_bfs_scheduler(InitialConfig) ->
-  {ok, Engine} = gen_server:start_link(test_engine, ['ra-kv-store_module', scheduler_bfs], []),
-  MILInstructions = [],
   Conf = maps:from_list([
     {num_processes, list_to_integer(os:getenv("NUM_PROCESSES", "2"))},
     {num_possible_dev_points, 10},
-    {size_d_tuple, 5}
+    {size_d_tuple, 5},
+    {num_runs, list_to_integer(os:getenv("NUM_RUNS", "2"))},
+    {run_length, list_to_integer(os:getenv("RUN_LENGTH", "40"))}
     ] ++ InitialConfig),
+  {ok, Engine} = gen_server:start_link(test_engine, ['ra-kv-store_module', scheduler_bfs, Conf], []),
+  MILInstructions = [],
   Timeout = infinity,
   Runs = test_engine:explore(Engine, 'ra-kv-store_module', Conf,
     MILInstructions, list_to_integer(os:getenv("NUM_RUNS", "2")), list_to_integer(os:getenv("RUN_LENGTH", "40")), Timeout), % 100, 5
+  gen_server:stop(Engine),
   lists:foreach(fun({RunId, History}) -> io:format("Run ~p: ~p", [RunId,History]) end, Runs).
 
 
 test_pct_scheduler(InitialConfig) ->
-  {ok, Engine} = gen_server:start_link(test_engine, ['ra-kv-store_module', scheduler_pct], []),
-  MILInstructions = [],
   Conf = maps:from_list([
     {num_processes, list_to_integer(os:getenv("NUM_PROCESSES", "2"))},
     {num_possible_dev_points, 40},
+    {num_runs, list_to_integer(os:getenv("NUM_RUNS", "2"))},
+    {run_length, list_to_integer(os:getenv("RUN_LENGTH", "40"))},
     {size_d_tuple, 5}
   ] ++ InitialConfig),
+  {ok, Engine} = gen_server:start_link(test_engine, ['ra-kv-store_module', scheduler_pct, Conf], []),
+  MILInstructions = [],
   Timeout = infinity,
   Runs = test_engine:explore(Engine, 'ra-kv-store_module', Conf,
     MILInstructions, list_to_integer(os:getenv("NUM_RUNS", "3")), list_to_integer(os:getenv("RUN_LENGTH", "40")), Timeout), % 100, 5
+  gen_server:stop(Engine),
   lists:foreach(fun({RunId, History}) -> io:format("Run ~p: ~p", [RunId,History]) end, Runs).
 
