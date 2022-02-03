@@ -3,7 +3,7 @@
 -include_lib("common_test/include/ct.hrl").
 -include_lib("stdlib/include/assert.hrl").
 
--export([all/0, test_engine/1, test_module/1, init_per_testcase/2, init_per_suite/1, end_per_suite/1, end_per_testcase/2, test_bfs_scheduler/1, test_pct_scheduler/1]).
+-export([all/0, test_engine/1, test_module/1, init_per_testcase/2, init_per_suite/1, end_per_suite/1, end_per_testcase/2, test_bfs_scheduler/1, test_pct_scheduler/1, test_random_scheduler/1, test_fifo_scheduler/1]).
 
 all() -> [
    test_module,
@@ -37,7 +37,7 @@ init_per_testcase(TestCase, Config) ->
 %%  ok = gen_event:add_handler(om, raft_state_machine_safety, []),
 %%  ok = gen_event:add_handler(om, raft_log_matching, []),
 %% SBO
-  Config ++ [{html_output, true}, {test_name, TestCase}, {persist, true}].
+  Config ++ [{html_output, true}, {test_module, ?MODULE}, {test_name, TestCase}].
 
 end_per_testcase(_, Config) ->
   Config.
@@ -84,35 +84,33 @@ test_engine(InitialConfig) ->
 
 
 test_bfs_scheduler(InitialConfig) ->
-  Conf = maps:from_list([
-    {num_processes, list_to_integer(os:getenv("NUM_PROCESSES", "2"))},
-    {num_possible_dev_points, 10},
-    {size_d_tuple, 5},
-    {num_runs, list_to_integer(os:getenv("NUM_RUNS", "2"))},
-    {run_length, list_to_integer(os:getenv("RUN_LENGTH", "40"))}
-    ] ++ InitialConfig),
-  {ok, Engine} = gen_server:start_link(test_engine, ['ra-kv-store_module', scheduler_bfs, Conf], []),
-  MILInstructions = [],
-  Timeout = infinity,
-  Runs = test_engine:explore(Engine, 'ra-kv-store_module', Conf,
-    MILInstructions, list_to_integer(os:getenv("NUM_RUNS", "2")), list_to_integer(os:getenv("RUN_LENGTH", "40")), Timeout), % 100, 5
-  gen_server:stop(Engine),
-  lists:foreach(fun({RunId, History}) -> io:format("Run ~p: ~p", [RunId,History]) end, Runs).
-
+  Conf = InitialConfig ++ [{scheduler, scheduler_bfs}],
+  test_scheduler_general(Conf).
 
 test_pct_scheduler(InitialConfig) ->
+  Conf = InitialConfig ++ [{scheduler, scheduler_pct}],
+  test_scheduler_general(Conf).
+
+test_random_scheduler(InitialConfig) ->
+  Conf = InitialConfig ++ [{scheduler, scheduler_random_capped}],
+  test_scheduler_general(Conf).
+
+test_fifo_scheduler(InitialConfig) ->
+  Conf = InitialConfig ++ [{scheduler, scheduler_fifo_capped}],
+  test_scheduler_general(Conf).
+
+test_scheduler_general(InitialConfig) ->
   Conf = maps:from_list([
     {num_processes, list_to_integer(os:getenv("NUM_PROCESSES", "2"))},
     {num_possible_dev_points, 40},
     {num_runs, list_to_integer(os:getenv("NUM_RUNS", "2"))},
     {run_length, list_to_integer(os:getenv("RUN_LENGTH", "40"))},
-    {size_d_tuple, 5}
+    {size_d_tuple, list_to_integer(os:getenv("SIZE_D", "5"))}
   ] ++ InitialConfig),
-  {ok, Engine} = gen_server:start_link(test_engine, ['ra-kv-store_module', scheduler_pct, Conf], []),
+  {ok, Engine} = gen_server:start_link(test_engine, ['ra-kv-store_module', maps:get(scheduler, Conf), Conf], []),
   MILInstructions = [],
   Timeout = infinity,
   Runs = test_engine:explore(Engine, 'ra-kv-store_module', Conf,
-    MILInstructions, list_to_integer(os:getenv("NUM_RUNS", "3")), list_to_integer(os:getenv("RUN_LENGTH", "40")), Timeout), % 100, 5
+    MILInstructions, maps:get(num_runs, Conf), maps:get(run_length, Conf), Timeout),
   gen_server:stop(Engine),
   lists:foreach(fun({RunId, History}) -> io:format("Run ~p: ~p", [RunId,History]) end, Runs).
-
