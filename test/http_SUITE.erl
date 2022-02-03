@@ -65,7 +65,7 @@ http_handler(_Config) ->
     application:ensure_all_started(ra),
     % MIL: start scheduler and message interception_layer and pass it to ra
     {ok, Scheduler} = scheduler_naive:start(),
-    {ok, MIL} = message_interception_layer:start(Scheduler),
+    {ok, MIL} = message_interception_layer:start(),
 %%    erlang:display(MIL),
     {ok, [ra]} = ra:start([{msg_int_layer, MIL}]),
 %%    ra_system:start_default(),

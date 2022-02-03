@@ -30,12 +30,12 @@ end_per_suite(Config) ->
 
 init_per_testcase(TestCase, Config) ->
 %% OBS
-%%  {ok, _} = gen_event:start({global, om}),
-%%  ok = gen_event:add_handler({global, om}, raft_election_safety, []),
-%%  ok = gen_event:add_handler({global, om}, raft_leader_append_only, []),
-%%  ok = gen_event:add_handler({global, om}, raft_leader_completeness, []),
-%%  ok = gen_event:add_handler({global, om}, raft_state_machine_safety, []),
-%%  ok = gen_event:add_handler({global, om}, raft_log_matching, []),
+%%  {ok, _} = gen_event:start(om),
+%%  ok = gen_event:add_handler(om, raft_election_safety, []),
+%%  ok = gen_event:add_handler(om, raft_leader_append_only, []),
+%%  ok = gen_event:add_handler(om, raft_leader_completeness, []),
+%%  ok = gen_event:add_handler(om, raft_state_machine_safety, []),
+%%  ok = gen_event:add_handler(om, raft_log_matching, []),
 %% SBO
   Config ++ [{html_output, true}, {test_name, TestCase}, {persist, true}].
 
@@ -44,10 +44,9 @@ end_per_testcase(_, Config) ->
 
 test_module(InitialConfig) ->
   % MIL: start OM, message interception_layer and (initial) scheduler
-  {ok, OM} = gen_event:start({global, om}),
+  {ok, OM} = gen_event:start({local,om}),
   {ok, MIL} = message_interception_layer:start(),
   erlang:monitor(process, MIL),
-  application:set_env(sched_msg_interception_erlang, msg_int_layer, MIL),
 
   Conf = maps:from_list([{num_processes, 3}] ++ InitialConfig),
   {ok, _RKVMod} = 'ra-kv-store_module':start_link(Conf),
