@@ -15,8 +15,8 @@ all() -> [
 init_per_suite(Config) ->
   application:load(ra),
 %%  MIL
-  logger:set_primary_config(level, warning),
-  LogConf = #{config => #{file => "./MIL_log.log"}, level => warning},
+  logger:set_primary_config(level, debug),
+  LogConf = #{config => #{file => "./MIL_log.log"}, level => debug},
   logger:add_handler(myhandler, logger_std_h, LogConf),
 %%  LIM
   WorkDirectory = proplists:get_value(priv_dir, Config),
@@ -37,7 +37,9 @@ init_per_testcase(TestCase, Config) ->
 %%  ok = gen_event:add_handler(om, raft_state_machine_safety, []),
 %%  ok = gen_event:add_handler(om, raft_log_matching, []),
 %% SBO
-  Config ++ [{html_output, true}, {test_module, ?MODULE}, {test_name, TestCase}].
+  Config ++ [{html_output, true}, {test_module, ?MODULE}, {test_name, TestCase},
+  {persist, list_to_atom(os:getenv("PERSIST", "false"))}
+].
 
 end_per_testcase(_, Config) ->
   Config.
