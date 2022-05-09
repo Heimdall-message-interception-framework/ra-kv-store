@@ -1,5 +1,7 @@
 .eunit
 deps
+!deps/ra
+!deps/sched_msg_interception_erlang
 *.o
 *.beam
 *.plt
@@ -14,7 +16,6 @@ erl_crash.dump
 *.beam
 /.erlang.mk/
 /cover/
-/deps/
 /ebin/
 /doc/
 !/ebin/ra.app
@@ -36,4 +37,3 @@ _rel/
 *.tar.gz
 
 _checkouts/*
-deps/*
