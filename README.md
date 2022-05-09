@@ -1,16 +1,52 @@
 # Raft-based Key/Value Store
 
-[![Travis CI](https://travis-ci.org/rabbitmq/ra-kv-store.svg?branch=master)](https://travis-ci.org/rabbitmq/ra-kv-store)
+This is a modified version of [ra-kv-store](https://github.com/rabbitmq/ra-kv-store) by RabbitMQ.
+It is built on top of a [modified Raft implementation](https://gitlab.mpi-sws.org/rep-sys-group/ra) which uses our [message interception layer](https://gitlab.mpi-sws.org/fstutz/sched_msg_interception_erlang).
 
-This is a tiny key/value store based on [Ra](https://github.com/rabbitmq/ra) developed
-to be used in certain integration tests. It is not meant to be a general purpose project.
+## Getting Started 
 
-# Usage
-
-Start the HTTP API (added ```sudo``` since some files could not be copied otherwise but TODO: change this):
+This project makes use of git submodules to handle the git repositories of the various projects.
+In order to clone together with all of its dependencies, do the following:
 
 ```
-$ sudo make run
+$ git clone --recurse-submodules git-rts@gitlab.mpi-sws.org:rep-sys-group/ra-kv-store.git
+```
+
+**For some reason, you have to once build the project with make before any of the rebar3 commands below work:**
+
+```
+$ make run
+```
+
+## Building
+
+We use [rebar3](https://rebar3.readme.io/) to run tests and build the project.
+
+```
+$ rebar3 compile
+```
+
+## Typechecking
+
+```
+$ rebar3 dialyzer
+```
+
+## Testcases
+
+```
+$ rebar3 dialyzer
+```
+
+---
+
+**⚠ WARNING ⚠: The following parts of this readme come from the original [ra-kv-store repository](https://github.com/rabbitmq/ra-kv-store) and are not guaranteed to work with this codebase.**
+# Usage
+
+Start the HTTP API:
+
+```
+$ make run
 ```
 
 Use [HTTPie](https://httpie.org/) to play with the KV store. Retrieving a value:
