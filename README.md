@@ -12,6 +12,12 @@ In order to clone together with all of its dependencies, do the following:
 $ git clone --recurse-submodules git-rts@gitlab.mpi-sws.org:rep-sys-group/ra-kv-store.git
 ```
 
+To update the dependencies, run the following:
+
+```
+$ git submodule update --remote --recursive
+```
+
 **For some reason, you have to once build the project with make before any of the rebar3 commands below work:**
 
 ```
@@ -34,9 +40,8 @@ $ rebar3 dialyzer
 
 ## Testcases
 
-```
-$ rebar3 dialyzer
-```
+    $ rebar3 ct --suite=test/store_SUITE.erl 
+    $ rebar3 ct --suite=test/ra-kv-store_module_SUITE.erl # currently with verbose output
 
 ---
 
