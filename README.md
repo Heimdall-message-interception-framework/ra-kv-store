@@ -18,7 +18,7 @@ To update the dependencies, run the following:
 $ git submodule update --remote --recursive
 ```
 
-**For some reason, you have to once build the project with make before any of the rebar3 commands below work:**
+**For some reason, you have to build the project with make once before any of the rebar3 commands below work:**
 
 ```
 $ make run
