@@ -1,7 +1,8 @@
-# Raft-based Key/Value Store
-
 This is a modified version of [ra-kv-store](https://github.com/rabbitmq/ra-kv-store) by RabbitMQ.
-It is built on top of a [modified Raft implementation](https://gitlab.mpi-sws.org/rep-sys-group/ra) which uses our [message interception layer](https://gitlab.mpi-sws.org/fstutz/sched_msg_interception_erlang).
+It is built on top of a [modified Raft implementation](https://github.com/Heimdall-message-interception-framework/ra) which uses our message interception layer [Heimdall](https://github.com/Heimdall-message-interception-framework/heimdall).
+
+# Raft-based Key/Value Store (Original README)
+
 
 ## Getting Started 
 
