@@ -1,8 +1,8 @@
 [submodule "_checkouts/sched_msg_interception_erlang"]
 	path = _checkouts/sched_msg_interception_erlang
-	url = git-rts@gitlab.mpi-sws.org:fstutz/sched_msg_interception_erlang.git
-	branch = master
+	url = git@github.com:Heimdall-message-interception-framework/heimdall.git
+	branch = main
 [submodule "_checkouts/ra"]
 	path = _checkouts/ra
-	url = git-rts@gitlab.mpi-sws.org:rep-sys-group/ra.git
-	branch = master
+	url = git@github.com:Heimdall-message-interception-framework/ra.git
+	branch = main
